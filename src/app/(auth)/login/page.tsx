@@ -52,7 +52,7 @@ const LoginPage = () => {
       >
         <Link href="/" className="w-full flex justify-left items-center">
           {/* <Image src={Logo} alt="pronote logo" width={50} height={50} /> */}
-          <p>ProNote</p>
+          <h1>ProNote</h1>
         </Link>
         <FormDescription className="text-foreground/60">
           An All-In-One Collaboration and Productivity Platform
@@ -61,7 +61,7 @@ const LoginPage = () => {
           disabled={isLoading}
           control={form.control}
           name="email"
-          render={(field) => (
+          render={({ field }) => (
             <FormItem>
               <FormControl>
                 <Input type="email" placeholder="Email" {...field} />
@@ -74,7 +74,7 @@ const LoginPage = () => {
           disabled={isLoading}
           control={form.control}
           name="password"
-          render={(field) => (
+          render={({ field }) => (
             <FormItem>
               <FormControl>
                 <Input type="password" placeholder="Password" {...field} />
@@ -94,7 +94,7 @@ const LoginPage = () => {
         </Button>
         <span className="self-center">
           Don't have an account?
-          <Link href="/signin" className="text-primary">
+          <Link href="/signup" className="ml-2 text-primary">
             {""}Sign Up
           </Link>
         </span>
