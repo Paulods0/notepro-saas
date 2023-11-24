@@ -1,0 +1,62 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1700492347287,
+      "tag": "0000_outstanding_makkari",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1700492517842,
+      "tag": "0001_abnormal_nehzno",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1700493442475,
+      "tag": "0002_sharp_pete_wisdom",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1700493669495,
+      "tag": "0003_fluffy_forgotten_one",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1700497649962,
+      "tag": "0004_flat_brood",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1700503215334,
+      "tag": "0005_smooth_vargas",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1700753541123,
+      "tag": "0006_serious_lady_ursula",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1700767263169,
+      "tag": "0007_warm_barracuda",
+      "breakpoints": true
+    }
+  ]
+}

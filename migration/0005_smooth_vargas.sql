@@ -1,0 +1,1 @@
+ALTER TABLE "files" ALTER COLUMN "created_at" DROP NOT NULL;

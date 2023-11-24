@@ -1,6 +1,6 @@
 "use client"
 
-import Loader from "@/components/Loader"
+import Loader from "@/components/global/Loader"
 import { Button } from "@/components/ui/button"
 import {
   Form,

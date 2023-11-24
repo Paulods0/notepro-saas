@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS "files" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"createt_at" timestamp with time zone,
+	"created_at" timestamp with time zone,
 	"title" text NOT NULL,
 	"icon_id" text NOT NULL,
 	"data" text,

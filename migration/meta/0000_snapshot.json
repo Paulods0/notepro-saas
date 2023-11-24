@@ -1,5 +1,5 @@
 {
-  "id": "34d06ad6-4582-48f9-ab68-fc3e75fcad3e",
+  "id": "006d1cea-a9b0-48e1-9664-b6aa259a3307",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -15,8 +15,8 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "createt_at": {
-          "name": "createt_at",
+        "created_at": {
+          "name": "created_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
