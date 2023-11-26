@@ -124,6 +124,13 @@ const SettingsForm = () => {
     if (showingWorkspace) setWorkspaceDetails(showingWorkspace)
   }, [workspaceId, state])
 
+  useEffect(()=>{
+    if(!workspaceId) return
+    const fetchCollaborators = async()=>{
+      const response = 
+    }
+  },[])
+
   return (
     <div className="flex gap-4 flex-col">
       <p className="flex items-center gap-2 mt-6">

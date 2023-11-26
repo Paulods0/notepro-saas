@@ -24,11 +24,11 @@ import {
 interface BannerUploadFormProps {
   dirType: "workspace" | "folder" | "file"
   id: string
-  details: appWorkspacesType | appFoldersType | File | workspace | Folder
+  // details: appWorkspacesType | appFoldersType | File | workspace | Folder
 }
 
 const BannerUploadForm: React.FC<BannerUploadFormProps> = ({
-  details,
+  // details,
   dirType,
   id,
 }) => {

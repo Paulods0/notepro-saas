@@ -57,6 +57,13 @@
       "when": 1700767263169,
       "tag": "0007_warm_barracuda",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1701006144674,
+      "tag": "0008_freezing_zarda",
+      "breakpoints": true
     }
   ]
 }
