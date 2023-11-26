@@ -26,6 +26,7 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import EmojiPicker from "../global/emoji-picker"
 import { string } from "zod"
 import BannerUpload from "../banner-upload/banner-upload"
+import { useSocket } from "@/lib/providers/socket-provider"
 
 interface QuillEditorProps {
   dirDetails: File | Folder | workspace
@@ -61,6 +62,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
   const { state, workspaceId, folderId, dispatch } = useAppState()
   const supabase = createClientComponentClient()
   const pathname = usePathname()
+  const { socket } = useSocket()
 
   const [deletingBanner, setDeletingBanner] = useState(false)
   const [quill, setQuill] = useState<any>(null)

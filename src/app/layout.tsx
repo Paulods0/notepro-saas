@@ -8,6 +8,8 @@ import Header from "@/components/landing-page/header"
 import db from "@/lib/supabase/db"
 import AppStateProvider from "@/lib/providers/state-provider"
 import { SupabaseUserProvider } from "@/lib/providers/supabase-user-provider"
+import { SocketProvider } from "@/lib/providers/socket-provider"
+import { Toaster } from "@/components/ui/toaster"
 
 const inter = DM_Sans({ subsets: ["latin"] })
 // db()
@@ -27,7 +29,12 @@ export default function RootLayout({
       <body className={twMerge("bg-background", inter.className)}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <AppStateProvider>
-            <SupabaseUserProvider>{children}</SupabaseUserProvider>
+            <SupabaseUserProvider>
+              <SocketProvider>
+                {children}
+                <Toaster />
+              </SocketProvider>
+            </SupabaseUserProvider>
           </AppStateProvider>
         </ThemeProvider>
       </body>
