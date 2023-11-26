@@ -4,7 +4,12 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import clsx from "clsx"
 import { useRouter } from "next/navigation"
 import React, { useMemo, useState } from "react"
-import { Accordion, AccordionItem, AccordionTrigger } from "../ui/accordion"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "../ui/accordion"
 import EmojiPicker from "../global/emoji-picker"
 import { createFile, updateFile, updateFolder } from "@/lib/supabase/queries"
 import { toast } from "../ui/use-toast"
@@ -12,6 +17,7 @@ import TooltipComponent from "../global/tooltip-component"
 import { PlusIcon, Trash } from "lucide-react"
 import { File } from "@/lib/supabase/supabase.types"
 import { v4 } from "uuid"
+import { useSupabaseUser } from "@/lib/providers/supabase-user-provider"
 
 interface DropdownProps {
   title: string
@@ -33,6 +39,7 @@ const Dropdown: React.FC<DropdownProps> = ({
 }) => {
   const supabase = createClientComponentClient()
   const { dispatch, workspaceId, state, folderId } = useAppState()
+  const { user } = useSupabaseUser()
   const [isEditing, setIsEditing] = useState(false)
   const router = useRouter()
   //folder Title synced with server data and local
@@ -167,6 +174,65 @@ const Dropdown: React.FC<DropdownProps> = ({
     }
   }
   //move to trash
+  const moveToTrash = async () => {
+    if (!user?.email || !workspaceId) return
+    const pathId = id.split("folder")
+    if (listType === "folder") {
+      dispatch({
+        type: "UPDATE_FOLDER",
+        payload: {
+          folder: { inTrash: `Deleted by ${user?.email}` },
+          folderId: pathId[0],
+          workspaceId,
+        },
+      })
+      const { data, error } = await updateFolder(
+        {
+          inTrash: `Deleted by ${user?.email}`,
+        },
+        pathId[0]
+      )
+      if (error) {
+        toast({
+          title: "Error",
+          variant: "destructive",
+          description: "Could not move the folder to the trash",
+        })
+      } else {
+        toast({
+          title: "Success",
+          description: "Folder moved to the trash.",
+        })
+      }
+    }
+    if (listType === "file") {
+      dispatch({
+        type: "UPDATE_FILE",
+        payload: {
+          file: { inTrash: `Deleted by ${user?.email}` },
+          folderId: pathId[0],
+          workspaceId,
+          fileId: pathId[1],
+        },
+      })
+      const { data, error } = await updateFile(
+        { inTrash: `Deleted by ${user?.email}` },
+        pathId[1]
+      )
+      if (error) {
+        toast({
+          title: "Error",
+          variant: "destructive",
+          description: "Could not move the folder to trash",
+        })
+      } else {
+        toast({
+          title: "Success",
+          description: "Moved folder to trash",
+        })
+      }
+    }
+  }
   const isFolder = listType === "folder"
   const groupIdentifies = clsx(
     "dark:text-white whitespace-nowrap flex justify-between items-center w-full relative",
@@ -221,6 +287,8 @@ const Dropdown: React.FC<DropdownProps> = ({
         title: "Error",
         description: "Could not create file",
       })
+    } else {
+      toast({ title: "Success", description: "File created." })
     }
   }
 
@@ -273,6 +341,7 @@ const Dropdown: React.FC<DropdownProps> = ({
           <div className={hoverStyles}>
             <TooltipComponent message="Delete Folder">
               <Trash
+                onClick={moveToTrash}
                 size={15}
                 className="hover:dark:text-white dark:text-Neutrals/neutrals-7 transition-colors"
               />
@@ -280,7 +349,7 @@ const Dropdown: React.FC<DropdownProps> = ({
             {listType === "folder" && !isEditing && (
               <TooltipComponent message="Add File">
                 <PlusIcon
-                  // onClick={addNewFile}
+                  onClick={addNewFile}
                   size={15}
                   className="hover:dark:text-white dark:text-Neutrals/neutrals-7 transition-colors"
                 />
@@ -289,6 +358,24 @@ const Dropdown: React.FC<DropdownProps> = ({
           </div>
         </div>
       </AccordionTrigger>
+      <AccordionContent>
+        {state.workspaces
+          .find((workspace) => workspace.id === workspaceId)
+          ?.folders.find((folder) => folder.id === id)
+          ?.files.filter((file) => !file.inTrash)
+          .map((file) => {
+            const customFileId = `${id}/folder${file.id}`
+            return (
+              <Dropdown
+                key={file.id}
+                title={file.title}
+                listType="file"
+                id={customFileId}
+                iconId={file.iconId}
+              />
+            )
+          })}
+      </AccordionContent>
     </AccordionItem>
   )
 }

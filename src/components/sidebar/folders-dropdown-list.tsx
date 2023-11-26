@@ -26,6 +26,7 @@ const FoldersDropdownList: React.FC<FoldersDropdownListProps> = ({
   const { state, dispatch, folderId } = useAppState()
   const [folders, setFolders] = useState(workspaceFolders)
   const { subscription } = useSupabaseUser()
+
   const { toast } = useToast()
 
   //effect set initial state server app state

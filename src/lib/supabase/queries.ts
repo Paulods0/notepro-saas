@@ -139,14 +139,14 @@ export const createFolder = async (folder: Folder) => {
     return { data: null, error: "Error" }
   }
 }
-export const getUsersFromSearch = async (email: string) => {
-  if (!email) return []
-  const accounts = await db
-    .select()
-    .from(users)
-    .where(ilike(users.email, `${email}%`))
-  return accounts
-}
+// export const getUsersFromSearch = async (email: string) => {
+//   if (!email) return []
+//   const accounts = await db
+//     .select()
+//     .from(users)
+//     .where(ilike(users.email, `${email}%`))
+//   return accounts
+// }
 
 export const updateFolder = async (
   folder: Partial<Folder>,
@@ -182,24 +182,24 @@ export const getWorkspaceDetails = async (workspaceId: string) => {
   }
 }
 
-// export const getFileDetails = async (fileId: string) => {
-//   const isValid = validate(fileId)
-//   if (!isValid) {
-//     data: []
-//     error: "Error"
-//   }
-//   try {
-//     const response = (await db
-//       .select()
-//       .from(files)
-//       .where(eq(files.id, fileId))
-//       .limit(1)) as File[]
-//     return { data: response, error: null }
-//   } catch (error) {
-//     console.log("🔴Error", error)
-//     return { data: [], error: "Error" }
-//   }
-// }
+export const getFileDetails = async (fileId: string) => {
+  const isValid = validate(fileId)
+  if (!isValid) {
+    data: []
+    error: "Error"
+  }
+  try {
+    const response = (await db
+      .select()
+      .from(files)
+      .where(eq(files.id, fileId))
+      .limit(1)) as File[]
+    return { data: response, error: null }
+  } catch (error) {
+    console.log("🔴Error", error)
+    return { data: [], error: "Error" }
+  }
+}
 
 export const deleteFile = async (fileId: string) => {
   if (!fileId) return
@@ -258,26 +258,26 @@ export const getFiles = async (folderId: string) => {
 //   })
 // }
 
-// export const removeCollaborators = async (
-//   users: User[],
-//   workspaceId: string
-// ) => {
-//   const response = users.forEach(async (user: User) => {
-//     const userExists = await db.query.collaborators.findFirst({
-//       where: (u, { eq }) =>
-//         and(eq(u.userId, user.id), eq(u.workspaceId, workspaceId)),
-//     })
-//     if (userExists)
-//       await db
-//         .delete(collaborators)
-//         .where(
-//           and(
-//             eq(collaborators.workspaceId, workspaceId),
-//             eq(collaborators.userId, user.id)
-//           )
-//         )
-//   })
-// }
+export const removeCollaborators = async (
+  users: User[],
+  workspaceId: string
+) => {
+  const response = users.forEach(async (user: User) => {
+    const userExists = await db.query.collaborators.findFirst({
+      where: (u, { eq }) =>
+        and(eq(u.userId, user.id), eq(u.workspaceId, workspaceId)),
+    })
+    if (userExists)
+      await db
+        .delete(collaborators)
+        .where(
+          and(
+            eq(collaborators.workspaceId, workspaceId),
+            eq(collaborators.userId, user.id)
+          )
+        )
+  })
+}
 
 export const findUser = async (userId: string) => {
   const response = await db.query.users.findFirst({
@@ -363,11 +363,11 @@ export const updateWorkspace = async (
 //   return resolvedUsers.filter(Boolean) as User[]
 // }
 
-// export const getUsersFromSearch = async (email: string) => {
-//   if (!email) return []
-//   const accounts = db
-//     .select()
-//     .from(users)
-//     .where(ilike(users.email, `${email}%`))
-//   return accounts
-// }
+export const getUsersFromSearch = async (email: string) => {
+  if (!email) return []
+  const accounts = db
+    .select()
+    .from(users)
+    .where(ilike(users.email, `${email}%`))
+  return accounts
+}
