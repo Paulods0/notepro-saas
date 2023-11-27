@@ -15,6 +15,7 @@ import PlanUsage from "./plan-usage"
 import NativeNavigation from "./native-navigation"
 import { ScrollArea } from "../ui/scroll-area"
 import FoldersDropdownList from "./folders-dropdown-list"
+import UserCard from "./user-card"
 
 interface SidebarProps {
   params: { workspaceId: string }
@@ -38,7 +39,7 @@ const Sidebar: React.FC<SidebarProps> = async ({ params, className }) => {
   //error
   if (subscriptionsError || foldersError) redirect("/dashboard")
   //get all the differents workspaces private; collaborating; shared
-  const [privateWorkspaces, collaboratingWorkspaces, sharedWorspaces] =
+  const [privateWorkspaces, collaboratingWorkspaces, sharedWorkspaces] =
     await Promise.all([
       getPrivateWorkspaces(user.id),
       getCollaboratingWorkspaces(user.id),
@@ -54,13 +55,13 @@ const Sidebar: React.FC<SidebarProps> = async ({ params, className }) => {
     >
       <div>
         <WorkspaceDropdown
-          collaboratingWorkspaces={collaboratingWorkspaces}
           privateWorkspaces={privateWorkspaces}
-          sharedWorkspaces={sharedWorspaces}
+          sharedWorkspaces={sharedWorkspaces}
+          collaboratingWorkspaces={collaboratingWorkspaces}
           defaultValue={[
             ...privateWorkspaces,
-            ...sharedWorspaces,
             ...collaboratingWorkspaces,
+            ...sharedWorkspaces,
           ].find((workspace) => workspace.id === params.workspaceId)}
         />
         <PlanUsage
@@ -68,14 +69,30 @@ const Sidebar: React.FC<SidebarProps> = async ({ params, className }) => {
           subscription={subscriptionData}
         />
         <NativeNavigation myWorkspaceId={params.workspaceId} />
-        <ScrollArea className="overflow-scroll-auto relative h-[450px]">
-          <div className="pointer-events-none w-full absolute bottom-0 h-20 bg-gradient-to-t from-background to-transparent z-40" />
+        <ScrollArea
+          className="overflow-y-auto relative
+          h-[360px]
+        "
+        >
+          <div
+            className="pointer-events-none 
+          w-full 
+          absolute 
+          bottom-0 
+          h-20 
+          bg-gradient-to-t 
+          from-background 
+          to-transparent 
+          z-40"
+          />
           <FoldersDropdownList
             workspaceFolders={workspaceFolderData || []}
             workspaceId={params.workspaceId}
           />
         </ScrollArea>
       </div>
+
+      <UserCard subscription={subscriptionData} />
     </aside>
   )
 }

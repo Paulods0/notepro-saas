@@ -12,6 +12,7 @@ import { Input } from "../ui/input"
 import {
   addCollaborator,
   deleteWorkspace,
+  getCollaborators,
   removeCollaborators,
   updateWorkspace,
 } from "@/lib/supabase/queries"
@@ -30,6 +31,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 import { ScrollArea } from "../ui/scroll-area"
 import { Alert, AlertDescription } from "../ui/alert"
 import { Separator } from "@radix-ui/react-select"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog"
 
 const SettingsForm = () => {
   const { toast } = useToast()
@@ -39,7 +50,7 @@ const SettingsForm = () => {
   const { state, workspaceId, dispatch } = useAppState()
   const [permissions, setPermissions] = useState("Private")
   const [collaborators, setCollaborators] = useState<User[] | []>([])
-  const [openAlertMessage, setOpenAlertMessage] = useState()
+  const [openAlertMessage, setOpenAlertMessage] = useState(false)
   const [workspaceDetails, setWorkspaceDetails] = useState<workspace>()
   const titleTimeRef = useRef<ReturnType<typeof setTimeout>>()
   const [uploadingProfilePicture, setUploadingProfilePicture] = useState(false)
@@ -54,10 +65,10 @@ const SettingsForm = () => {
     //setOpen(true)
     //return
     //}
-    await addCollaborator(collaborators, workspaceId)
+    await addCollaborator([profile], workspaceId)
     setCollaborators([...collaborators, profile])
     //To refresh our workspace categories
-    router.refresh()
+    // router.refresh()
   }
   //remove collaborators
   const removeCollaborator = async (user: User) => {
@@ -113,6 +124,22 @@ const SettingsForm = () => {
     }
   }
   //onClicks
+  const onClickAlertConfirm = async () => {
+    if (!workspaceId) return
+    if (collaborators.length > 0) {
+      await removeCollaborators(collaborators, workspaceId)
+    }
+    setPermissions("private")
+    setOpenAlertMessage(false)
+  }
+
+  const onPermissionsChange = async (val: string) => {
+    if (val === "private") {
+      setOpenAlertMessage(true)
+    } else {
+      setPermissions(val)
+    }
+  }
   //fetching avatar details
   //get workspace details
   //get all the collaborators
@@ -124,12 +151,17 @@ const SettingsForm = () => {
     if (showingWorkspace) setWorkspaceDetails(showingWorkspace)
   }, [workspaceId, state])
 
-  useEffect(()=>{
-    if(!workspaceId) return
-    const fetchCollaborators = async()=>{
-      const response = 
+  useEffect(() => {
+    if (!workspaceId) return
+    const fetchCollaborators = async () => {
+      const response = await getCollaborators(workspaceId)
+      if (response.length) {
+        setPermissions("shared")
+        setCollaborators(response)
+      }
     }
-  },[])
+    fetchCollaborators()
+  }, [])
 
   return (
     <div className="flex gap-4 flex-col">
@@ -169,12 +201,7 @@ const SettingsForm = () => {
       </div>
       <>
         <Label htmlFor="permissions">Permissions</Label>
-        <Select
-          onValueChange={(val) => {
-            setPermissions(val)
-          }}
-          defaultValue={permissions}
-        >
+        <Select onValueChange={onPermissionsChange} value={permissions}>
           <SelectTrigger className="w-full h-26 -mt-3">
             <SelectValue />
           </SelectTrigger>
@@ -279,6 +306,25 @@ const SettingsForm = () => {
           </Button>
         </Alert>
       </>
+      <AlertDialog open={openAlertMessage}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Changing a Shared workspace to a Private workspace will remove all
+              collaborators permanently.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setOpenAlertMessage(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={onClickAlertConfirm}>
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

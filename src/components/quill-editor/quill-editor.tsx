@@ -8,6 +8,7 @@ import { XCircleIcon } from "lucide-react"
 import {
   deleteFile,
   deleteFolder,
+  findUser,
   getFileDetails,
   getFolderDetails,
   getWorkspaceDetails,
@@ -71,12 +72,13 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
   const { socket, isConnected } = useSocket()
   const router = useRouter()
 
+  const [localCursors, setLocalCursors] = useState<any>([])
   const [deletingBanner, setDeletingBanner] = useState(false)
   const [quill, setQuill] = useState<any>(null)
   const [saving, setSaving] = useState(false)
   const [collaborators, setCollaborators] = useState<
     { id: string; email: string; avatarUrl: string }[]
-  >([{ id: "12345", email: "pauloluguenda0@gmail.com", avatarUrl: "imageUrl" }])
+  >([])
 
   const details = useMemo(() => {
     let selectedDir
@@ -156,15 +158,15 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
       const editor = document.createElement("div")
       wrapper.append(editor)
       const Quill = (await import("quill")).default
-      // const QuillCursors = (await import("quill-cursors")).default
-      // Quill.register("modules/cursors", QuillCursors)
+      const QuillCursors = (await import("quill-cursors")).default
+      Quill.register("modules/cursors", QuillCursors)
       const q = new Quill(editor, {
         theme: "snow",
         modules: {
           toolbar: TOOLBAR_OPTIONS,
-          // cursors: {
-          //   transformOnTextChange: true,
-          // },
+          cursors: {
+            transformOnTextChange: true,
+          },
         },
       })
       setQuill(q)
@@ -404,7 +406,63 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
 
       if (saveTimeRef.current) clearTimeout(saveTimeRef.current)
     }
-  }, [socket, fileId, user, details, folderId, workspaceId])
+  }, [quill, socket, fileId, user, details, folderId, workspaceId, dispatch])
+
+  useEffect(() => {
+    if (quill === null || socket === null) return
+    const socketHandler = (deltas: any, id: string) => {
+      if (id === fileId) {
+        quill.updateContents(deltas)
+      }
+    }
+    socket.on("receive-changes", socketHandler)
+    return () => {
+      socket.off("receive-changes", socketHandler)
+    }
+  }, [quill, socket, fileId])
+
+  useEffect(() => {
+    if (!fileId || quill === null) return
+    const room = supabase.channel(fileId)
+    const subscription = room
+      .on("presence", { event: "sync" }, () => {
+        const newState = room.presenceState()
+        const newCollaborators = Object.values(newState).flat() as any
+        setCollaborators(newCollaborators)
+        if (user) {
+          const allCursors: any = []
+          newCollaborators.forEach(
+            (collaborator: { id: string; email: string; avatar: string }) => {
+              if (collaborator.id !== user.id) {
+                const userCursor = quill.getModule("cursors")
+                userCursor.createCursor(
+                  collaborator.id,
+                  collaborator.email.split("@")[0],
+                  `#${Math.random().toString(16).slice(2, 0)}`
+                )
+                allCursors.push(userCursor)
+              }
+            }
+          )
+          setLocalCursors(allCursors)
+        }
+      })
+      .subscribe(async (status) => {
+        if (status !== "SUBSCRIBED" || !user) return
+        const response = await findUser(user.id)
+        room.track({
+          id: user.id,
+          email: user.email?.split("@")[0],
+          avatarUrl: response?.avatarUrl
+            ? supabase.storage.from("avatars").getPublicUrl(response?.avatarUrl)
+                .data.publicUrl
+            : "",
+        })
+      })
+    return () => {
+      supabase.removeChannel(room)
+    }
+  }, [fileId, quill, supabase, user])
 
   return (
     <>
