@@ -200,6 +200,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
         payload: { fileId, folderId, workspaceId },
       })
       await deleteFile(fileId)
+      router.replace(`/dashboard/${workspaceId}`)
     }
     if (dirType === "folder") {
       if (!folderId || !workspaceId) return
@@ -208,6 +209,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
         payload: { folderId: fileId, workspaceId },
       })
       await deleteFolder(fileId)
+      router.replace(`/dashboard/${workspaceId}`)
     }
   }
 
@@ -348,7 +350,13 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
   //send quill changes
   useEffect(() => {
     if (quill === null || socket === null || !fileId || !user) return
-    const selectionChangeHandler = () => {}
+    const selectionChangeHandler = (cursorId: string) => {
+      return (range: any, oldRange: any, source: any) => {
+        if (source === "user" && cursorId) {
+          socket.emit("send-cursor-move", range, fileId, cursorId)
+        }
+      }
+    }
     const quillHandler = (delta: any, oldDelta: any, source: any) => {
       if (source !== "user") return
       if (saveTimeRef.current) clearTimeout(saveTimeRef.current)
@@ -398,11 +406,11 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
       socket.emit("send-changes", delta, fileId)
     }
     quill.on("text-change", quillHandler)
-    //WIP cursors selected handler
+    quill.on("selection-change", selectionChangeHandler(user.id))
 
     return () => {
       quill.off("text-change", quillHandler)
-      //WIP cursors
+      quill.off("selection-change", selectionChangeHandler)
 
       if (saveTimeRef.current) clearTimeout(saveTimeRef.current)
     }
@@ -464,9 +472,28 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
     }
   }, [fileId, quill, supabase, user])
 
+  useEffect(() => {
+    if (quill === null || socket === null || !fileId || !localCursors.length)
+      return
+    const socketHandler = (range: any, roomId: string, cursorId: string) => {
+      if (roomId === fileId) {
+        const cursorToMove = localCursors.find(
+          (cursor: any) => cursor.cursors()?.[0].id === cursorId
+        )
+        if (cursorToMove) {
+          cursorToMove.moveCursor(cursorId, range)
+        }
+      }
+    }
+    socket.on("receive-cursor-move", socketHandler)
+    return () => {
+      socket.off("receive-cursor-move", socketHandler)
+    }
+  }, [quill, socket, fileId, localCursors])
+
   return (
     <>
-      {isConnected ? "Connected" : "Not connected"}
+      {isConnected ? "🟢" : "🔴"}
       <div className="relative">
         {details.inTrash && (
           <article className="py-2 z-40 bg-[#EB5757] flex md:flex-row flex-col justify-center items-center gap-4 flex-wrap ">
@@ -514,7 +541,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({
                         </AvatarFallback>
                       </Avatar>
                     </TooltipTrigger>
-                    <TooltipContent>User name</TooltipContent>
+                    <TooltipContent>{collaborator.email}</TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               ))}

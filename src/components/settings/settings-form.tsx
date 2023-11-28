@@ -6,7 +6,17 @@ import { useRouter } from "next/navigation"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { useAppState } from "@/lib/providers/state-provider"
 import { User, workspace } from "@/lib/supabase/supabase.types"
-import { Briefcase, Lock, Plus, SeparatorHorizontal, Share } from "lucide-react"
+import {
+  Briefcase,
+  CreditCardIcon,
+  ExternalLink,
+  Lock,
+  LogOut,
+  Plus,
+  SeparatorHorizontal,
+  Share,
+  User as UserIcon,
+} from "lucide-react"
 import { Label } from "../ui/label"
 import { Input } from "../ui/input"
 import {
@@ -41,13 +51,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../ui/alert-dialog"
+import CypressProfileIcon from "../icons/ProfileIcon"
+import LogoutButton from "../global/logout-button"
+import Link from "next/link"
+import { useSubscriptionModal } from "@/lib/providers/subscription-modal-provider"
 
 const SettingsForm = () => {
   const { toast } = useToast()
-  const { user } = useSupabaseUser()
+  const { user, subscription } = useSupabaseUser()
   const router = useRouter()
   const supabase = createClientComponentClient()
   const { state, workspaceId, dispatch } = useAppState()
+  const { open, setOpen } = useSubscriptionModal()
+
   const [permissions, setPermissions] = useState("Private")
   const [collaborators, setCollaborators] = useState<User[] | []>([])
   const [openAlertMessage, setOpenAlertMessage] = useState(false)
@@ -194,10 +210,13 @@ const SettingsForm = () => {
           accept="image/*"
           placeholder="Workspace Logo"
           onChange={onChangeWorkspaceLogo}
-          //WIP SUBSCRIPTiON
-          disabled={uploadingLogo}
+          disabled={uploadingLogo || subscription?.status !== "active"}
         />
-        {/**subscription */}
+        {subscription?.status !== "active" && (
+          <small className="text-muted-foreground ">
+            To customize your workspace, you need to be on a Pro Plan.
+          </small>
+        )}
       </div>
       <>
         <Label htmlFor="permissions">Permissions</Label>
@@ -305,6 +324,81 @@ const SettingsForm = () => {
             Delete workspace
           </Button>
         </Alert>
+        <p className="flex items-center gap-2 mt-6">
+          <UserIcon size={20} /> Profile
+        </p>
+        <div className="flex items-center">
+          <Avatar>
+            <AvatarImage src={""} />
+            <AvatarFallback>
+              <CypressProfileIcon />
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col ml-6">
+            <small className="text-muted-foreground cursor-not-allowed">
+              {user ? user.email : ""}
+            </small>
+            <Label
+              htmlFor="profilePicture"
+              className="text-sm text-muted-foreground"
+            >
+              Profile Picture
+            </Label>
+            <Input
+              name="profilePicture"
+              type="file"
+              accept="image/*"
+              placeholder="Profile Picture"
+              // onChange={onChangeProfilePicture}
+              disabled={uploadingProfilePicture}
+            />
+          </div>
+        </div>
+        <LogoutButton>
+          <div className="flex items-center ">
+            <LogOut />
+          </div>
+        </LogoutButton>
+        <p className="flex items-center gap-2 mt-6">
+          <CreditCardIcon size={20} /> Billing & Plan
+        </p>
+        <p className="text-muted-foreground">
+          You are currently on a {""}
+          {subscription?.status === "active" ? "Pro" : "Free"} Plan
+        </p>
+        <Link
+          href="/"
+          target="_blank"
+          className="text-muted-foreground flex flex-row items-center gap-2"
+        >
+          View Plans <ExternalLink size={16} />
+        </Link>
+        {subscription?.status === "active" ? (
+          <div>
+            <Button
+              type="button"
+              size="sm"
+              variant={"secondary"}
+              className="text-sm"
+              // TODO: disabled={loadingPortal}
+              // TODO: onClick={redirectToCustomerPortal}
+            >
+              Manage Subscription
+            </Button>
+          </div>
+        ) : (
+          <div>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              className="text-sm"
+              onClick={() => setOpen(true)}
+            >
+              Start Plan
+            </Button>
+          </div>
+        )}
       </>
       <AlertDialog open={openAlertMessage}>
         <AlertDialogContent>
