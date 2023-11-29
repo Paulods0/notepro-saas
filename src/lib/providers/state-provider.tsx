@@ -120,8 +120,8 @@ const appReducer = (
               ...workspace,
               folders: action.payload.folders.sort(
                 (a, b) =>
-                  new Date(a.createdAt).getTime() -
-                  new Date(b.createdAt).getTime()
+                  new Date(a.createtAt).getTime() -
+                  new Date(b.createtAt).getTime()
               ),
             }
           }
@@ -136,8 +136,8 @@ const appReducer = (
             ...workspace,
             folders: [...workspace.folders, action.payload.folder].sort(
               (a, b) =>
-                new Date(a.createdAt).getTime() -
-                new Date(b.createdAt).getTime()
+                new Date(a.createtAt).getTime() -
+                new Date(b.createtAt).getTime()
             ),
           }
         }),
@@ -325,9 +325,9 @@ const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
     if (!folderId || !workspaceId) return
     const fetchFiles = async () => {
       const { error: filesError, data } = await getFiles(folderId)
-      if (filesError) {
-        console.log(filesError)
-      }
+      // if (filesError) {
+      //   console.log(filesError)
+      // }
       if (!data) return
       dispatch({
         type: "SET_FILES",
@@ -337,9 +337,9 @@ const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
     fetchFiles()
   }, [folderId, workspaceId])
 
-  useEffect(() => {
-    console.log("App State Changed", state)
-  }, [state])
+  // useEffect(() => {
+  //   // console.log("App State Changed", state)
+  // }, [state])
 
   return (
     <AppStateContext.Provider

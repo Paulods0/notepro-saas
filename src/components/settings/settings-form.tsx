@@ -55,6 +55,7 @@ import CypressProfileIcon from "../icons/ProfileIcon"
 import LogoutButton from "../global/logout-button"
 import Link from "next/link"
 import { useSubscriptionModal } from "@/lib/providers/subscription-modal-provider"
+import { postData } from "@/lib/utils"
 
 const SettingsForm = () => {
   const { toast } = useToast()
@@ -71,16 +72,29 @@ const SettingsForm = () => {
   const titleTimeRef = useRef<ReturnType<typeof setTimeout>>()
   const [uploadingProfilePicture, setUploadingProfilePicture] = useState(false)
   const [uploadingLogo, setUploadingLogo] = useState(false)
+  const [loadingPortal, setLoadingPortal] = useState(false)
   //WIP PAYMENT PORTAL
+  const redirectToCustomerPortal = async () => {
+    setLoadingPortal(true)
+    try {
+      const { url, error } = await postData({
+        url: "/api/create-portal-link",
+      })
+      window.location.assign(url)
+    } catch (error) {
+      console.log(error)
+      setLoadingPortal(false)
+    }
+    setLoadingPortal(false)
+  }
 
   //add collaborators
   const addCollaborators = async (profile: User) => {
     if (!workspaceId) return
-    //WIP Subscription
-    //if(subscription?.status !== "active" && collaborators.length >= 2){
-    //setOpen(true)
-    //return
-    //}
+    if (subscription?.status !== "active" && collaborators.length >= 2) {
+      setOpen(true)
+      return
+    }
     await addCollaborator([profile], workspaceId)
     setCollaborators([...collaborators, profile])
     //To refresh our workspace categories
@@ -380,8 +394,8 @@ const SettingsForm = () => {
               size="sm"
               variant={"secondary"}
               className="text-sm"
-              // TODO: disabled={loadingPortal}
-              // TODO: onClick={redirectToCustomerPortal}
+              disabled={loadingPortal}
+              onClick={redirectToCustomerPortal}
             >
               Manage Subscription
             </Button>

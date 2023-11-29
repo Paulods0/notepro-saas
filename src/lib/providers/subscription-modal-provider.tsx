@@ -7,6 +7,7 @@ import {
   useContext,
   useState,
 } from "react"
+import { ProductWirhPrice } from "../supabase/supabase.types"
 
 type SubscriptionModalContextType = {
   open: boolean
@@ -24,14 +25,16 @@ export const useSubscriptionModal = () => {
 
 export const SubscriptionModalProvider = ({
   children,
+  products,
 }: {
   children: React.ReactNode
+  products: ProductWirhPrice[]
 }) => {
   const [open, setOpen] = useState(false)
   return (
     <SubscriptionModalContext.Provider value={{ open, setOpen }}>
       {children}
-      <SubscriptionModal />
+      <SubscriptionModal products={products} />
     </SubscriptionModalContext.Provider>
   )
 }
