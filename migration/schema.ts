@@ -11,7 +11,7 @@ import {
   integer,
 } from "drizzle-orm/pg-core"
 
-import { relations, sql } from "drizzle-orm"
+import { sql } from "drizzle-orm"
 export const keyStatus = pgEnum("key_status", [
   "expired",
   "invalid",
@@ -87,7 +87,10 @@ export const workspaces = pgTable("workspaces", {
 
 export const folders = pgTable("folders", {
   id: uuid("id").defaultRandom().primaryKey().notNull(),
-  createtAt: timestamp("createt_at", { withTimezone: true, mode: "string" })
+  createdAt: timestamp("created_at", {
+    withTimezone: true,
+    mode: "string",
+  })
     .defaultNow()
     .notNull(),
   title: text("title").notNull(),
@@ -97,7 +100,9 @@ export const folders = pgTable("folders", {
   bannerUrl: text("banner_url"),
   workspaceId: uuid("workspace_id")
     .notNull()
-    .references(() => workspaces.id, { onDelete: "cascade" }),
+    .references(() => workspaces.id, {
+      onDelete: "cascade",
+    }),
 })
 
 export const files = pgTable("files", {
@@ -214,14 +219,3 @@ export const collaborators = pgTable("collaborators", {
     .references(() => users.id, { onDelete: "cascade" }),
   id: uuid("id").defaultRandom().notNull(),
 })
-
-export const productsRelations = relations(products, ({ many }) => ({
-  prices: many(prices),
-}))
-
-export const pricesRelations = relations(prices, ({ one }) => ({
-  products: one(products, {
-    fields: [prices.productId],
-    references: [products.id],
-  }),
-}))

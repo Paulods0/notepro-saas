@@ -34,7 +34,7 @@ export const workspaces = pgTable("workspaces", {
 
 export const folders = pgTable("folders", {
   id: uuid("id").defaultRandom().primaryKey().notNull(),
-  createdAt: timestamp("createt_at", {
+  createdAt: timestamp("created_at", {
     withTimezone: true,
     mode: "string",
   })

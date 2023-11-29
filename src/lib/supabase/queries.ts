@@ -2,7 +2,14 @@
 import { validate } from "uuid"
 import { files, folders, users, workspaces } from "../../../migration/schema"
 import db from "./db"
-import { File, Folder, Subscription, User, workspace } from "./supabase.types"
+import {
+  File,
+  Folder,
+  Price,
+  Subscription,
+  User,
+  workspace,
+} from "./supabase.types"
 import { and, eq, ilike, notExists } from "drizzle-orm"
 import { collaborators } from "./schema"
 import { revalidatePath } from "next/cache"
@@ -42,7 +49,7 @@ export const getFolders = async (workspaceId: string) => {
     const results: Folder[] | [] = await db
       .select()
       .from(folders)
-      .orderBy(folders.createtAt)
+      .orderBy(folders.createdAt)
       .where(eq(folders.workspaceId, workspaceId))
     return { data: results, error: null }
   } catch (error) {
@@ -290,9 +297,9 @@ export const getActiveProductsWithPrice = async () => {
   try {
     const res = await db.query.products.findMany({
       where: (pro, { eq }) => eq(pro.active, true),
-
       with: {
         prices: {
+          //@ts-ignore
           where: (pri, { eq }) => eq(pri.active, true),
         },
       },

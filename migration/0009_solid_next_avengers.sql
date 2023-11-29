@@ -1,0 +1,1 @@
+ALTER TABLE "folders" RENAME COLUMN "createt_at" TO "created_at";
